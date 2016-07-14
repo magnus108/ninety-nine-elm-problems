@@ -8,21 +8,19 @@ main =
     in
         text result
 
-last : List a -> Maybe a
-last xs =
+countElements : List a -> Int
+countElements xs =
     case xs of
         [] ->
-            Nothing
-        [x] ->
-            Just x
+            0
         x::xs ->
-            last xs
+            1 + countElements xs
 
-data : List ( Maybe number, Maybe number )
+data : List ( Int, number )
 data =
-    [ ( last [1..2], Just 2 )
-    , ( last [1], Just 1 )
-    , ( last [], Nothing )
+    [ ( countElements [1..100], 100 )
+    , ( countElements [1], 1 )
+    , ( countElements [], 0 )
     ]
 
 test : ( a, a ) -> Bool
