@@ -47,5 +47,6 @@ tests =
     , ( [], [] )
     ]
 
+test : ( List number, List number ) -> ( List number ->  List number ) -> Bool
 test ( result, expect ) solution =
     (solution result) == expect
