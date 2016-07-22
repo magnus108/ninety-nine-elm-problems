@@ -13,6 +13,20 @@ andMap : List (a -> b) -> List a -> List b
 andMap funcs vals =
     List.concatMap (\f -> List.map f vals) funcs
 
+symCbalTrees1 : Int -> List (Tree Int)
+symCbalTrees1 = List.filter symmetric1 << cbalTree1
+
+symmetric1 : Tree a -> Bool
+symmetric1 t = mirror t t
+
+mirror : Tree a -> Tree a -> Bool
+mirror x y =
+    case (x, y) of
+        (Empty, Empty) -> True
+        ((Branch _ l1 r1), (Branch _ l2 r2)) ->
+            mirror l1 r2 && mirror r1 l2
+        _ -> False
+
 cbalTree1 : Int -> List (Tree Int)
 cbalTree1 n =
     case n of
@@ -30,18 +44,6 @@ cbalTree1 n =
                     in
                         lift2 (Branch 1) x y ++ lift2 (Branch 1) y x
 
-cbalTree2 : Int -> List (Tree Int)
-cbalTree2 n =
-    case n of
-        0 -> [Empty]
-        n ->
-            let
-                (p, q) = (n - 1) `quotRem` 2
-                lr = List.map (\ i ->
-                    (cbalTree2 i, cbalTree2 ( n - i - 1 ))) [p .. p + q]
-            in
-                List.concatMap (uncurry (lift2 (Branch 1))) lr
-
 quotRem : Int -> Int -> ( Int, Int )
 quotRem x y =
     ( x // y, x `rem` y )
@@ -58,29 +60,19 @@ leaf x = Branch x Empty Empty
 
 solutions : List (Int -> List (Tree Int))
 solutions =
-    [ cbalTree1
-    , cbalTree2
+    [ symCbalTrees1
     ]
 
-tests : List ( Int, List (Tree Int) )
+tests : List ( Int, List (Tree Int), List (Tree Int) ->
+        List (Tree Int) -> Bool)
 tests =
-    [ ( 4, [ Branch 1 ( Branch 1 Empty Empty)
-                      ( Branch 1 Empty
-                          ( Branch 1 Empty Empty))
-           , Branch 1 ( Branch 1 Empty Empty)
-                      ( Branch 1 (Branch 1 Empty Empty)
-                          Empty)
-           , Branch 1 ( Branch 1 Empty
-                          ( Branch 1 Empty Empty))
-                      ( Branch 1 Empty Empty)
-           , Branch 1 ( Branch 1 (Branch 1 Empty Empty)
-                           Empty)
-                      ( Branch 1 Empty Empty)])
-    , ( 1, [ leaf 1 ] )
-    , ( 0, [ Empty ] )
+    [ (5, [ Branch 1 (Branch 1 Empty (Branch 1 Empty Empty))
+                    (Branch 1 (Branch 1 Empty Empty) Empty)
+          , Branch 1 (Branch 1 (Branch 1 Empty Empty) Empty)
+                    (Branch 1 Empty (Branch 1 Empty Empty))], (==))
     ]
 
-test : ( Int, List (Tree Int) ) ->
-    ( Int -> List ( Tree Int )) -> Bool
-test ( result, expect ) solution =
-    (solution result) == expect
+test : ( Int, List (Tree Int), List (Tree Int) -> List (Tree Int) -> Bool ) ->
+    ( Int -> List (Tree Int)) -> Bool
+test ( result, expect, comparer ) solution =
+    comparer (solution result) expect

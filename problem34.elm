@@ -13,6 +13,12 @@ andMap : List (a -> b) -> List a -> List b
 andMap funcs vals =
     List.concatMap (\f -> List.map f vals) funcs
 
+totient1 : Int -> Int
+totient1 a =
+    [1..a]
+    |> List.filter (coprime1 a)
+    |> List.length
+
 coprime1 : Int -> Int -> Bool
 coprime1 a b =
     gcd1 a b == 1
@@ -24,18 +30,17 @@ gcd1 a b =
     else
         gcd1 b (a % b)
 
-solutions : List ( ( Int, Int) -> Bool)
+solutions : List ( Int -> Int )
 solutions =
-    [ uncurry coprime1
+    [ totient1
     ]
 
-tests : List ( (Int, Int), Bool )
+tests : List ( Int, Int )
 tests =
-    [ ( (23, 37), True )
-    , ( (2, 12), False )
+    [ ( 10, 4 )
+    , ( 1, 1 )
     ]
 
-test : ( (Int, Int), Bool ) ->
-    ( (Int, Int) -> Bool) -> Bool
+test : ( Int, Int ) -> ( Int -> Int) -> Bool
 test ( result, expect ) solution =
     (solution result) == expect
